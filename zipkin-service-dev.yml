@@ -1,0 +1,87 @@
+server:
+  port: 9411
+
+zipkin: 
+  storage: 
+    type: mysql
+spring:
+  sleuth: 
+    enabled: false
+  datasource: 
+    druid: 
+      name: zipkin
+#      type: com.alibaba.druid.pool.DruidDataSource
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/zipkin?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false 
+      username: root
+      password: admin
+      # 初始化大小，最小，最大
+      initial-size: 5
+      max-active: 10
+      min-idle: 5
+      # 配置获取连接等待超时的时间
+      max-wait: 30000
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      max-open-prepared-statements: 20
+      validation-query: SELECT 1 FROM DUAL
+      validation-query-timeout: 60000
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      time-between-eviction-runs-millis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      min-evictable-idle-time-millis: 100000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      max-evictable-idle-time-millis: 200000
+      filters: stat,wall,log4j
+      # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilte
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: .js,.gif,.jpg,.png,.css,.ico,/druid/*
+        session-stat-enable: true
+        session-stat-max-count: 1000
+        principal-session-name: 
+        principal-cookie-name: 
+        profile-enable: true
+      # StatViewServlet配置，说明请参考Druid Wiki，配置_StatViewServlet配置
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: true
+        login-username: druid
+        login-password: druid
+        allow: 127.0.0.1
+        deny: 
+      # 配置StatFilter
+      filter:
+        stat:
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      # 配置WallFilter
+        wall:
+          enabled: true
+          db-type: mysql
+          config:
+            delete-allow: false
+            drop-table-allow: false
+          
+      
+      
+eureka:
+  client:
+    service-url:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8769/eureka/
+  instance:
+    prefer-ip-address: true
+    #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+    #注意，EurekaServer一定要设置eureka.server.eviction-interval-timer-in-ms否则这个配置无效，这个配置一般为服务刷新时间配置的三倍
+    #默认90s
+    lease-expiration-duration-in-seconds: 9
+    #服务刷新时间配置，每隔这个时间会主动心跳一次
+    #默认30s
+    lease-renewal-interval-in-seconds: 5    
